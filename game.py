@@ -2,100 +2,130 @@ class Street:
     def __init__(self, sname: str, __o: object = None) -> None:
         self.name = sname
         self.next = __o
-        self.description = None
-        self.characters = None
-        self.items = None
+        self._description = None
+        self._characters = None
+        self._items = None
 
-    def set_description(self, sdescr: str) -> None:
-        self.description = sdescr
+    @property
+    def description(self) -> None:
+        return self._description
 
-    def add_characters(self, scharacters: list) -> None:
-        self.characters = scharacters
+    @property
+    def characters(self) -> list:
+        return self._characters
 
-    def add_items(self, sitems: list) -> None:
-        self.items = sitems
+    @property
+    def items(self) -> list:
+        return self._items
 
-    def get_info(self) -> None:
-        print(self.name)
-        print('----------------')
+    @description.setter
+    def description(self, sdescription: str) -> None:
+        self._description = sdescription
+
+    @characters.setter
+    def characters(self, scharacters: list) -> None:
+        self._characters = scharacters
+
+    @items.setter
+    def items(self, sitems: list) -> None:
+        self._items = sitems
+
+    def print_info(self) -> None:
+        print('\n')
+        print(f'You are on {self.name}')
+        print('-'*20)
         print(self.description)
-
-    def get_characters(self) -> list:
-        return self.characters
-
-    def get_items(self) -> list:
-        return self.items
 
 
 class Character:
     def __init__(self, cname: str) -> None:
         self.name = cname
         self.conversation = None
-        self.type = None
 
-    def get_info(self) -> None:
-        print(f'{self.name} is here! He is a {self.type}')
+    def print_info(self) -> None:
+        print(f'{self.name} is here! He is a {str(self)}')
 
     def talk(self) -> None:
         print(f'[{self.name} says:] {self.conversation}')
 
 
-class Student(Character):
+class Enemy(Character):
     def __init__(self, cname: str) -> None:
         super().__init__(cname)
-        self.conversation = 'Feed me to hear how to defeat a Zbui.'
-        self.type = 'friend student'
+
+
+class Friend(Character):
+    def __init__(self, cname: str) -> None:
+        super().__init__(cname)
+
+
+class Student(Friend):
+    def __init__(self, cname: str) -> None:
+        super().__init__(cname)
+        self.conversation = 'Feed me to hear how to defeat a zbui.'
+
+    def __str__(self) -> str:
+        return 'student'
 
     def give_hint(self, street: object) -> None:
         found = False
         for character in street.characters:
             if isinstance(character, Zbui):
                 found = True
-                char = character
+                zbui = character
                 break
         if found:
-            print(f'You can defeat {char.name} using {char.weakness}.')
+            print(f'You can defeat {zbui.name} using {zbui.weakness}.')
         else:
-            print('No Zbui here, sorry.')
+            print('No zbui in this street, sorry.')
 
 
-class Kavaler(Character):
+class Kavaler(Friend):
     def __init__(self, cname: str) -> None:
         super().__init__(cname)
-        self.conversation = f'Hi! My name is {self.name}, I am just chillin.'
-        self.type = 'friend kavaler'
+        self.conversation = f'Hi! My name is {self.name} and I am a kavaler.\n\
+I am just chilling.'
+
+    def __str__(self) -> str:
+        return 'kavaler'
 
 
-class Batyar(Character):
+class Batyar(Friend):
     def __init__(self, cname: str) -> None:
         super().__init__(cname)
-        self.conversation = 'Yo! Got smth to drink? I can defeat a Lotr!'
-        self.type = 'friend batyar'
+        self.conversation = 'Yo! Got smth to drink? If you give me a sip, \
+I will defeat a lotr for you.'
+
+    def __str__(self) -> str:
+        return 'batyar'
 
 
-class Lotr(Character):
+class Lotr(Enemy):
     def __init__(self, cname: str) -> None:
         super().__init__(cname)
-        self.conversation = 'Only a Batyar can defeat me!'
-        self.type = 'enemy lotr'
+        self.conversation = 'Only a Batyar can defeat me.'
+
+    def __str__(self) -> str:
+        return 'lotr'
 
 
-class Zbui(Character):
+class Zbui(Enemy):
     def __init__(self, cname: str, zweakness: str) -> None:
         super().__init__(cname)
-        self.conversation = 'You have to defeat me before you can keep going.'
+        self.conversation = 'You can only defeat me with a specific weapon.'
         self.weakness = zweakness
-        self.type = 'enemy zbui'
 
-    def fight(self, weapon: str) -> bool:
-        return self.weakness == weapon
+    def __str__(self) -> str:
+        return 'zbui'
 
 
-class Laydak(Character):
+class Laydak(Enemy):
     def __init__(self, cname: str) -> None:
         super().__init__(cname)
-        self.conversation = 'I will steal all your stuff if you pass me!'
-        self.type = 'enemy laydak'
+        self.conversation = 'I will steal all your belongings if you pass me.'
+
+    def __str__(self) -> str:
+        return 'laydak'
 
 
 class Item:
@@ -103,23 +133,37 @@ class Item:
         self.name = iname
         self.type = None
 
-    def get_info(self) -> None:
-        print(f'{self.type} {self.name} is here.')
+    def print_info(self) -> None:
+        print(f'[{self.name}] is here.')
 
 
 class Life(Item):
     def __init__(self, iname: str) -> None:
         super().__init__(iname)
-        self.type = 'extralife'
+
+    def __str__(self) -> str:
+        return 'life'
 
 
-class Support(Item):
+class Food(Item):
     def __init__(self, iname: str) -> None:
         super().__init__(iname)
-        self.type = 'support'
+
+    def __str__(self) -> str:
+        return 'food'
+
+
+class Drink(Item):
+    def __init__(self, iname: str) -> None:
+        super().__init__(iname)
+
+    def __str__(self) -> str:
+        return 'drink'
 
 
 class Weapon(Item):
     def __init__(self, iname: str) -> None:
         super().__init__(iname)
-        self.type = 'weapon'
+
+    def __str__(self) -> str:
+        return 'weapon'

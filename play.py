@@ -1,4 +1,8 @@
+"""Module setting the game environment and
+running the game process"""
+
 import game
+from pprint import pprint
 
 
 # can tell you how to defeat the zbui if you feed them
@@ -26,208 +30,238 @@ zbui3 = game.Zbui('Tymur', 'riffle')
 laydak1 = game.Laydak('Igor')
 laydak2 = game.Laydak('Yura')
 
-
 # items that can be found on the streets lyign randomly
 extralife = game.Life('extralife')
-wine = game.Support('wine')
-whiskey = game.Support('whiskey')
-beer = game.Support('beer')
-hotdog = game.Support('hotdog')
-pasta = game.Support('pasta')
-kebab = game.Support('kebab')
+wine = game.Drink('wine')
+whiskey = game.Drink('whiskey')
+beer = game.Drink('beer')
+hotdog = game.Food('hotdog')
+pasta = game.Food('pasta')
+kebab = game.Food('kebab')
 gun = game.Weapon('gun')
 knife = game.Weapon('knife')
 riffle = game.Weapon('riffle')
 
-
 # streets on the route
 end = game.Street('End')
-
+end.description = 'End of the game.'
+# fifth street
 krakivska = game.Street('Krakivska st.', end)
-krakivska.set_description('This is your final stage. Defeat the boss to win.')
-krakivska.add_characters([laydak2, student1])
-krakivska.add_items([beer, whiskey, extralife, kebab])
-
+krakivska.description = 'This is your final stage. Defeat the boss to win.'
+krakivska.characters = [laydak2, student1]
+krakivska.items = [beer, whiskey, extralife, kebab]
+# fourth street
 shevchenka = game.Street('Shevchenka st.', krakivska)
-shevchenka.set_description('You have almost reached the end, but the real \
-challanges are ahead!')
-shevchenka.add_characters([student3, kavaler3, batyar3, lotr3, zbui3])
-shevchenka.add_items([pasta, whiskey])
-
+shevchenka.description = 'You have almost reached the end, but the real \
+challanges are ahead!'
+shevchenka.characters = [student3, kavaler3, batyar3, lotr3, zbui3]
+shevchenka.items = [pasta, whiskey]
+# third street
 franka = game.Street('Franka st.', shevchenka)
-franka.set_description('This is your third street. It is too soon to relax!')
-franka.add_characters([kavaler2, laydak1, batyar2, lotr2])
-franka.add_items([wine, hotdog, riffle])
-
+franka.description = 'This is your third street. It is too soon to relax!'
+franka.characters = [kavaler2, laydak1, batyar2, lotr2]
+franka.items = [wine, hotdog, riffle]
+# second street
 kozelnytska = game.Street('Kozelnytska st.', franka)
-kozelnytska.set_description('Congrats! You have made it to the second street. \
-Keep going.')
-kozelnytska.add_characters([student2, batyar1, lotr1, zbui2])
-kozelnytska.add_items([extralife, whiskey, beer, pasta, kebab])
-
+kozelnytska.description = 'Congrats! You have made it to the second street. \
+Keep going.'
+kozelnytska.characters = [student2, batyar1, lotr1, zbui2]
+kozelnytska.items = [extralife, whiskey, beer, pasta, kebab]
+# first street
 striyska = game.Street('Striyska st.', kozelnytska)
-striyska.set_description('First street on you route. Farewell and stay safe!')
-striyska.add_characters([student1, kavaler1, zbui1])
-striyska.add_items([wine, gun, knife, hotdog])
+striyska.description = 'First street on you route. Farewell and stay safe!'
+striyska.characters = [student1, kavaler1, zbui1]
+striyska.items = [wine, gun, knife, hotdog]
 
 
 current_street = striyska
-backpack = []
+backpack = {'food': [], 'drink': [], 'weapon': [], 'life': []}
 DEAD = False
 
 while DEAD is False:
+    current_street.print_info()
     print('\n')
-    current_street.get_info()
 
-    print('\n')
-    characters = current_street.get_characters()
+    characters = current_street.characters
     for character in characters:
-        character.get_info()
-
+        character.print_info()
     print('\n')
-    items = current_street.get_items()
+
+    items = current_street.items
     for item in items:
         if not isinstance(item, game.Life):
-            item.get_info()
-
+            item.print_info()
     print('\n')
-    print('Choose action')
+
+    print('Choose action. To view all available action, enter "actions".')
     action = input('>>> ')
 
-    if action == 'next':
-        enemies_alive = False
-        laydak_alive = False
+    if action == 'actions':
+        print("""
+            Available actions:
+                > talk - talk to a character on this street.
+                > take - put item from this room to your backpack.
+                > backpack - view contents of the backpack.
+                > feed - feed a student to get a hint.
+                > drink - drink with a batyar to receive his help.
+                > fight - fight a character with a weapon from the backpack.
+                > next - move to the next street.
+                \n
+            """)
+        action = input('>>> ')
 
-        for character in current_street.get_characters():
-            if 'enemy' in character.type and 'laydak' not in character.type:
-                print('You have to defeat all enemies to pass!')
-                enemies_alive = True
-                break
-        for character in current_street.get_characters():
-            if 'laydak' in character.type:
-                laydak_alive = True
-                break
-
-        if not enemies_alive:
-            if laydak_alive:
-                backpack = []
-            current_street = current_street.next
-    elif action == 'talk':
-        print('Who you want to talk to? Enter name.')
+    if action == 'talk':
+        print('Who you want to talk to? Enter character name.')
         name = input('>>> ')
-
         if name in [character.name for character in current_street.characters]:
             for character in current_street.characters:
                 if character.name == name:
                     character.talk()
         else:
-            print('No such character here.')
+            print('No such character in this street. Choose the correct name.')
+    elif action == 'take':
+        print('Choose what to take. Enter item name.')
+        name = input('>>> ')
+        if name in [item.name for item in current_street.items]:
+            for item in current_street.items:
+                if item.name == name:
+                    backpack[str(item)].append(item.name)
+                    current_street.items.remove(item)
+                    break
+            print(f'You have put [{name}] in your backpack.')
+        elif current_street.items:
+            print('No such item on this street. Choose another item name.')
+        else:
+            print('There are no more items on this street.')
+    elif action == 'backpack':
+        if backpack.values():
+            print(f'Your backpack contains: {backpack}')
+        else:
+            print('Your backpack is empty. Take something to put it there.')
     elif action == 'feed':
-        print('Choose who you want to feed.')
+        print('Choose who you want to feed. Enter character name.')
         name = input('>>> ')
         if name in [character.name for character in current_street.characters]:
             for character in current_street.characters:
                 if character.name == name:
-                    if 'student' in character.type:
-                        print('Choose what you want to feed him with.')
-                        food = input('>>> ')
+                    # if 'student' in character.type:
+                    if isinstance(character, game.Student):
+                        print('Choose what you want to feed the student with. \
+Enter food name.')
+                        name = input('>>> ')
                         found = False
-                        for item in backpack:
-                            if item == food and food in ['hotdog', 'pasta', 'kebab']:
+                        for food in backpack['food']:
+                            if food == name:
                                 found = True
-                                backpack.remove(item)
+                                backpack['food'].remove(food)
                                 character.give_hint(current_street)
                                 break
                         if not found:
-                            print('No such food in backpack.')
+                            print('No such food in your backpack. \
+Choose another food or take it from the street.')
                     else:
-                        print('You can only feed students.')
+                        print(f'You can only feed students. \
+{character.name} is not a student.')
         else:
-            print('No such character in this street.')
+            print('No such character in this street. Choose the correct name.')
+
     elif action == 'drink':
-        print('Choose who you want to drink with.')
+        print('Choose who you want to drink with. Enter character name.')
         name = input('>>> ')
         if name in [character.name for character in current_street.characters]:
             for character in current_street.characters:
                 if character.name == name:
-                    if 'batyar' in character.type:
-                        print('Choose what you want to drink wiht him.')
-                        drink = input('>>> ')
+                    if isinstance(character, game.Batyar):
+                        print('Choose what you want to drink. \
+Enter a drink name.')
+                        name = input('>>> ')
                         found = False
-                        for item in backpack:
-                            if item in ['wine', 'beer', 'whiskey'] and item == drink:
+                        for drink in backpack['drink']:
+                            if drink == name:
                                 found = True
-                                backpack.remove(item)
-                                for one in current_street.characters:
-                                    if 'lotr' in one.type:
-                                        current_street.characters.remove(one)
-                                        print(f'Lotr {one.name} is defeated.')
+                                backpack['drink'].remove(drink)
+                                for char in current_street.characters:
+                                    if isinstance(char, game.Lotr):
+                                        current_street.characters.remove(char)
+                                        print(f'Batyar {character.name} \
+defeated lotr {char.name} for you.')
                                         break
                                 break
                         if not found:
-                            print('No such drink in backpack.')
+                            print('No such drink in your backpack. \
+Choose another drink or take it from the street.')
                     else:
-                        print('You can only drink with batyars.')
+                        print(f'You can only drink with batyars. \
+{character.name} is not a batyar.')
         else:
-            print('No such character in this street.')
+            print('No such character in this street. Choose the correct name.')
+
     elif action == 'fight':
-        print('Choose who you want to figth.')
+        print('Choose who you want to figth. Enter character name.')
         name = input('>>> ')
         if name in [character.name for character in current_street.characters]:
             for character in current_street.characters:
                 if character.name == name:
-                    print('Now, choose your weapon.')
-                    weapon = input('>>> ')
-                    if weapon in backpack:
-                        if 'zbui' in character.type:
-                            if character.fight(weapon):
+                    print('Choose what to fight with. Enter weapon name.')
+                    name = input('>>> ')
+                    if name in backpack['weapon']:
+                        if isinstance(character, game.Zbui):
+                            if character.weakness == name:
                                 current_street.characters.remove(character)
-                                print(f'You defeated {character.name} with a {weapon}')
+                                print(f'You defeated {character.name} \
+with a {name}.')
                             else:
-                                print('You lost the fight.')
-                                if 'extralife' in backpack:
-                                    backpack.remove('extralife')
-                                    print('Your luck you had an extra life!')
+                                print(f'You lost to {character.name}.')
+                                if 'extralife' in backpack['life']:
+                                    backpack['life'].remove('extralife')
+                                    print('Your luck you had an extra life! \
+Keep playing, but be careful.')
                                 else:
-                                    print('You lost.')
+                                    print('Game over!')
                                     DEAD = True
-                        elif 'laydak' in character.type:
-                            if weapon in ['knife', 'gun', 'riffle']:
-                                current_street.characters.remove(character)
-                                print(f'You defeated {character.name} with a {weapon}')
-                            else:
-                                backpack = []
-                                print('You lost the fight.')
-                                print('Laydak stole everything from backpack.')
-                        elif 'lotr' in character.name:
-                            print('Only batyar could defeat a lotr.')
+                        elif isinstance(character, game.Laydak):
+                            current_street.characters.remove(character)
+                            print(f'You defeated {character.name} \
+with a {name}.')
+                        elif isinstance(character, game.Lotr):
+                            print('Only batyar can defeat a lotr.')
                             print('You lost the fight!')
                             if 'extralife' in backpack:
-                                backpack.remove('extralife')
-                                print('Your luck you had an extra life!')
+                                backpack['life'].remove('extralife')
+                                print('Your luck you had an extra life! \
+Keep playing, but be careful.')
                             else:
-                                print('You lost.')
+                                print('Game over!')
                                 DEAD = True
                         else:
-                            print('You can only fight Zbui or Landak.')
+                            print('You can only fight with zbui or landak.')
                     else:
-                        print('No such weapon in your backpack.')
+                        print('No such weapon in your backpack. \
+Choose another weapon or take it from the street.')
                     break
         else:
-            print('No such character here!')
-    elif action == 'take':
-        print('Choose what to take.')
-        item_name = input('>>> ')
-        if item_name in [item.name for item in current_street.items]:
-            backpack.append(item_name)
-            for item in current_street.items:
-                if item.name == item_name:
-                    current_street.items.remove(item)
-                    break
-            print(f'You have put {item_name} inside the backpack.')
+            print('No such character in this street. Choose the correct name.')
+    elif action == 'next':
+        enemies_alive = False
+        laydaks_alive = False
+        for character in current_street.characters:
+            if isinstance(character, game.Enemy) and not isinstance(
+                    character, game.Laydak):
+                print('You have to defeat all enemies before you can pass.')
+                enemies_alive = True
+                break
+        for character in current_street.characters:
+            if isinstance(character, game.Laydak):
+                laydaks_alive = True
+                break
+        if not enemies_alive:
+            if laydaks_alive:
+                backpack = {'food': [], 'drink': [], 'weapon': [], 'life': []}
+            current_street = current_street.next
     else:
-        print(f'You cannot "{action}"!')
+        print(f'You cannot "{action}". Choose correct action.\n\
+To see all available actions, enter "actions".')
 
     if current_street.next is None:
-        print('Congrats, you have won the game.')
+        print('Congrats, you have won the game. Good luck.')
         DEAD = True
