@@ -2,7 +2,6 @@
 running the game process"""
 
 import game
-from pprint import pprint
 
 
 # can tell you how to defeat the zbui if you feed them
